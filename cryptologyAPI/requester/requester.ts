@@ -15,12 +15,12 @@ import {
 import { ExchangeResponse } from "./types.ts";
 
 export class Requester {
+  protected readonly log: log.Logger;
   protected readonly baseURL: string;
   protected readonly authInfo?: types.AuthInfo;
   protected readonly reqParams: types.RequestParameters;
   protected readonly nonce: types.NonceGetter;
   protected readonly rateLimiter: RateLimiter;
-  protected readonly log: log.Logger;
 
   constructor(opts: types.RequesterOptions = {}) {
     this.log = getLogger("requester");

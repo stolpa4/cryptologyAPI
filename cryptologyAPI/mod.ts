@@ -21,10 +21,13 @@ import { Requester } from "./requester/requester.ts";
 
 const req = new Requester();
 
-await req.request({
+let resp = await req.request({
   path: "/v1/public/get-order-book?trade_pair=ETH_USDT",
   method: "get",
 });
+
+
+console.log(resp, typeof resp);
 
 // let p = [];
 //
