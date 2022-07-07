@@ -1,32 +1,38 @@
-import { Requester } from "./requester/requester.ts";
 import { log } from "./deps.ts";
-
 await log.setup({
   handlers: {
-    console: new log.handlers.ConsoleHandler("DEBUG"),
+    console: new log.handlers.ConsoleHandler("DEBUG", {
+      formatter: "{datetime}: [{levelName}]: {msg}",
+    }),
   },
   loggers: {
     default: {
       level: "DEBUG",
       handlers: ["console"],
     },
-    cryptologyAPI: {
+    "CryptologyAPI.requester": {
       level: "DEBUG",
       handlers: ["console"],
     },
   },
 });
 
+import { Requester } from "./requester/requester.ts";
+
 const req = new Requester();
 
-let p = [];
+await req.request({
+  path: "/v1/public/get-order-book?trade_pair=ETH_USDT",
+  method: "get",
+});
 
-for (let i = 0; i < 10; ++i) {
-  p.push(req.request({
-    path: "/v1/public/get-order-book",
-    method: "get",
-    data: { trade_pair: "ETH_USDT" },
-  }));
-}
-
-console.log(await Promise.all(p));
+// let p = [];
+//
+// for (let i = 0; i < 10; ++i) {
+//   p.push(req.request({
+//     path: "/v1/public/get-order-book?trade_pair=ETH_USDT",
+//     method: "get",
+//   }));
+// }
+//
+// console.log(await Promise.all(p));

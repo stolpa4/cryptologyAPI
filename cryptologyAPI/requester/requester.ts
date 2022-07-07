@@ -1,21 +1,18 @@
-import * as types from "./types.ts";
 import * as rand from "../common/utils/random.ts";
+import * as types from "./types.ts";
 
+import { getLogger } from "../common/logging.ts";
+import { delay, log, RateLimiter } from "../deps.ts";
 import {
   DEFAULT_API_URL,
   DEFAULT_REQUEST_PARAMS,
   PUBLIC_HEADERS,
 } from "./constants.ts";
-import { getLogger } from "../common/logging.ts";
-import { RateLimiter } from "../deps.ts";
-import { ExchangeResponse } from "./types.ts";
-import { delay } from "../deps.ts";
 import {
   UnableToPerformRequestError,
   UnauthorizedRequestError,
 } from "./error.ts";
-
-const log = getLogger("requester");
+import { ExchangeResponse } from "./types.ts";
 
 export class Requester {
   protected readonly baseURL: string;
@@ -23,14 +20,19 @@ export class Requester {
   protected readonly reqParams: types.RequestParameters;
   protected readonly nonce: types.NonceGetter;
   protected readonly rateLimiter: RateLimiter;
+  protected readonly log: log.Logger;
 
   constructor(opts: types.RequesterOptions = {}) {
+    this.log = getLogger("requester");
     this.baseURL = opts.baseURL ?? DEFAULT_API_URL;
     this.authInfo = opts.authInfo;
     this.reqParams = Object.assign(
       {},
       DEFAULT_REQUEST_PARAMS,
       opts.requestParameters,
+    );
+    this.log.debug(
+      `Initialized with request parameters: ${JSON.stringify(this.reqParams)}`,
     );
     this.nonce = this.defineNonceGetter();
     this.rateLimiter = new RateLimiter({
@@ -45,7 +47,7 @@ export class Requester {
     if (this.reqParams.useTimestampNonce) {
       return Date.now;
     } else {
-      log.debug(`Using initial nonce: ${nonce}`);
+      this.log.debug(`Using initial nonce: ${nonce}`);
       return () => nonce++;
     }
   }
@@ -54,19 +56,20 @@ export class Requester {
     const errs: unknown[] = [];
     const reqStr = JSON.stringify(req);
 
-    log.debug(`Performing request: ${reqStr}`);
-
     while (errs.length < this.reqParams.requestTries) {
       try {
         await this.rateLimiter.removeTokens(1);
+        this.log.debug(
+          `Performing request: ${reqStr} (try: ${errs.length + 1})`,
+        );
         const resp = await this.makeRequest(req);
-        log.debug(
+        this.log.debug(
           `Got response for request (${reqStr}): ${JSON.stringify(resp)}.`,
         );
         return resp as unknown as ExchangeResponse<unknown>;
       } catch (e) {
         errs.push(e?.toString());
-        log.error(`Error performing request (${reqStr}): ${e}.`);
+        this.log.error(`Error performing request (${reqStr}): ${e}.`);
         await delay(this.reqParams.requestErrorDelayMs);
       }
     }
@@ -78,7 +81,7 @@ export class Requester {
     req: types.Request,
   ): Promise<Record<string, unknown>> {
     const resp = await fetch(
-      new URL(this.baseURL, req.path).href,
+      new URL(req.path, this.baseURL).href,
       {
         headers: this.craftHeaders(req.isPrivate),
         method: req.method,
@@ -93,7 +96,7 @@ export class Requester {
       this.checkAuthorized();
 
       const _nonce = this.nonce();
-      log.debug(`Got private request. Using nonce: ${_nonce}`);
+      this.log.debug(`Got private request. Using nonce: ${_nonce}`);
       return {
         ...PUBLIC_HEADERS,
         "Access-Key": this.authInfo!.apiKey,

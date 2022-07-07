@@ -16,6 +16,6 @@
   - [x] Request-retry logic
   - [x] Rate limiting logic
   - [ ] Check
-  - [ ] Test
+  - [x] Test
   - [ ] Refactor
   - [ ] 100% tests coverage
