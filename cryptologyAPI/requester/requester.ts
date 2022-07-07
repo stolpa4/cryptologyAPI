@@ -1,8 +1,19 @@
 import * as types from "./types.ts";
-import { DEFAULT_REQUEST_PARAMS, PUBLIC_HEADERS } from "./constants.ts";
 import * as rand from "../common/utils/random.ts";
-import { UnauthorizedRequestError } from "./error.ts";
+
+import {
+  DEFAULT_API_URL,
+  DEFAULT_REQUEST_PARAMS,
+  PUBLIC_HEADERS,
+} from "./constants.ts";
 import { getLogger } from "../common/logging.ts";
+import { RateLimiter } from "../deps.ts";
+import { ExchangeResponse } from "./types.ts";
+import { delay } from "../deps.ts";
+import {
+  UnableToPerformRequestError,
+  UnauthorizedRequestError,
+} from "./error.ts";
 
 const log = getLogger("requester");
 
@@ -11,9 +22,10 @@ export class Requester {
   protected readonly authInfo?: types.AuthInfo;
   protected readonly reqParams: types.RequestParameters;
   protected readonly nonce: types.NonceGetter;
+  protected readonly rateLimiter: RateLimiter;
 
-  constructor(opts: types.RequesterOptions) {
-    this.baseURL = opts.baseURL;
+  constructor(opts: types.RequesterOptions = {}) {
+    this.baseURL = opts.baseURL ?? DEFAULT_API_URL;
     this.authInfo = opts.authInfo;
     this.reqParams = Object.assign(
       {},
@@ -21,6 +33,10 @@ export class Requester {
       opts.requestParameters,
     );
     this.nonce = this.defineNonceGetter();
+    this.rateLimiter = new RateLimiter({
+      tokensPerInterval: 1,
+      interval: this.reqParams.throttleMs,
+    });
   }
 
   protected defineNonceGetter(): types.NonceGetter {
@@ -34,8 +50,34 @@ export class Requester {
     }
   }
 
-  protected makeRequest(req: types.Request): Promise<Response> {
-    return fetch(
+  public async request(req: types.Request): Promise<ExchangeResponse<unknown>> {
+    const errs: unknown[] = [];
+    const reqStr = JSON.stringify(req);
+
+    log.debug(`Performing request: ${reqStr}`);
+
+    while (errs.length < this.reqParams.requestTries) {
+      try {
+        await this.rateLimiter.removeTokens(1);
+        const resp = await this.makeRequest(req);
+        log.debug(
+          `Got response for request (${reqStr}): ${JSON.stringify(resp)}.`,
+        );
+        return resp as unknown as ExchangeResponse<unknown>;
+      } catch (e) {
+        errs.push(e?.toString());
+        log.error(`Error performing request (${reqStr}): ${e}.`);
+        await delay(this.reqParams.requestErrorDelayMs);
+      }
+    }
+
+    throw new UnableToPerformRequestError(reqStr, errs);
+  }
+
+  protected async makeRequest(
+    req: types.Request,
+  ): Promise<Record<string, unknown>> {
+    const resp = await fetch(
       new URL(this.baseURL, req.path).href,
       {
         headers: this.craftHeaders(req.isPrivate),
@@ -43,6 +85,7 @@ export class Requester {
         body: req.data ? JSON.stringify(req.data) : undefined,
       },
     );
+    return await resp.json();
   }
 
   protected craftHeaders(isPrivate: boolean | undefined): HeadersInit {

@@ -12,3 +12,5 @@ export const PUBLIC_HEADERS: HeadersInit = Object.freeze({
   "Content-Type": "application/json",
   "User-Agent": `${API_NAME}/${API_VERSION}`,
 });
+
+export const DEFAULT_API_URL = "https://api.cryptology.com";

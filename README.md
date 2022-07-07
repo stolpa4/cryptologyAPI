@@ -4,11 +4,18 @@
 
 # TODO
 
+- [ ] **General**
+  - [ ] Configure code formatter
+
 - [ ] **Requester**
   - [x] Logger support
   - [x] Requester constructor and base types
   - [x] Baseline requester types
   - [x] A simple fetch request logic
   - [x] Request api (via fetch)
-  - [ ] Request-retry logic
-  - [ ] Rate limiting logic
+  - [x] Request-retry logic
+  - [x] Rate limiting logic
+  - [ ] Check
+  - [ ] Test
+  - [ ] Refactor
+  - [ ] 100% tests coverage
