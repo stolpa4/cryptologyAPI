@@ -4,8 +4,8 @@
 
 # TODO
 
-- [ ] **General**
-  - [ ] Configure code formatter
+- [x] **General**
+  - [x] Configure code formatter
 
 - [ ] **Requester**
   - [x] Logger support
@@ -15,7 +15,7 @@
   - [x] Request api (via fetch)
   - [x] Request-retry logic
   - [x] Rate limiting logic
-  - [ ] Check
+  - [x] Check
   - [x] Test
   - [ ] Refactor
   - [ ] 100% tests coverage

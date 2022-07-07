@@ -1,1 +1,1 @@
-export {Requester} from './requester.ts';
+export { Requester } from './requester.ts';
