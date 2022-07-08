@@ -1,4 +1,4 @@
-import { RequestParameters } from './types.ts';
+import { AuthInfo, RequestParameters } from './types.ts';
 import { API_NAME, API_VERSION } from '../common/constants.ts';
 
 export const DEFAULT_REQUEST_PARAMS: RequestParameters = Object.freeze({
@@ -14,3 +14,4 @@ export const PUBLIC_HEADERS: HeadersInit = Object.freeze({
 });
 
 export const DEFAULT_API_URL = 'https://api.cryptology.com';
+export const DEFAULT_AUTH_INFO: AuthInfo = Object.freeze({ apiKey: 'NONE', apiSecret: 'NONE' });

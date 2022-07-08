@@ -9,7 +9,7 @@
   - [ ] First stable release
   - [ ] Move to git-flow scheme
 
-- [ ] **Utils**
+- [x] **Utils**
   - [x] Test logging name compounding
   - [x] Test random int generation
 

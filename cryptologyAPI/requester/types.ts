@@ -1,7 +1,12 @@
+import { log, RateLimiter } from '../deps.ts';
+
 export interface RequesterOptions {
     readonly baseURL?: string;
     readonly authInfo?: AuthInfo;
     readonly requestParameters?: RequestParametersArg;
+    readonly logger?: log.Logger;
+    readonly nonceGetter?: NonceGetter;
+    readonly rateLimiter?: RateLimiter;
 }
 
 export interface AuthInfo {

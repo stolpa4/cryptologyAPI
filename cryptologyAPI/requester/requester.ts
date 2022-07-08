@@ -3,38 +3,34 @@ import * as types from './types.ts';
 
 import { getLogger } from '../common/logging.ts';
 import { delay, log, RateLimiter } from '../deps.ts';
-import { DEFAULT_API_URL, DEFAULT_REQUEST_PARAMS, PUBLIC_HEADERS } from './constants.ts';
+import { DEFAULT_API_URL, DEFAULT_AUTH_INFO, DEFAULT_REQUEST_PARAMS, PUBLIC_HEADERS } from './constants.ts';
 import { UnableToPerformRequestError, UnauthorizedRequestError } from './error.ts';
-import { ExchangeResponse } from './types.ts';
+import { ExchangeResponse, RequestParametersArg } from './types.ts';
 
 export class Requester {
     protected readonly log: log.Logger;
     protected readonly baseURL: string;
-    protected readonly authInfo?: types.AuthInfo;
+    protected readonly authInfo: types.AuthInfo;
     protected readonly reqParams: types.RequestParameters;
     protected readonly nonce: types.NonceGetter;
     protected readonly rateLimiter: RateLimiter;
 
     constructor(opts: types.RequesterOptions = {}) {
-        this.log = getLogger('requester');
+        this.log = opts.logger ?? getLogger('requester');
         this.baseURL = opts.baseURL ?? DEFAULT_API_URL;
-        this.authInfo = opts.authInfo;
-        this.reqParams = Object.assign(
-            {},
-            DEFAULT_REQUEST_PARAMS,
-            opts.requestParameters,
-        );
-        this.log.debug(
-            `Initialized with request parameters: ${JSON.stringify(this.reqParams)}`,
-        );
-        this.nonce = this.defineNonceGetter();
-        this.rateLimiter = new RateLimiter({
-            tokensPerInterval: 1,
-            interval: this.reqParams.throttleMs,
-        });
+        this.authInfo = opts.authInfo ?? DEFAULT_AUTH_INFO;
+        this.reqParams = this.applyDefaultRequestParams(opts.requestParameters);
+        this.nonce = opts.nonceGetter ?? this.defaultNonceGetter();
+        this.rateLimiter = opts.rateLimiter ?? this.defaultRateLimiter();
     }
 
-    protected defineNonceGetter(): types.NonceGetter {
+    protected applyDefaultRequestParams(reqParamsArg: RequestParametersArg | undefined): types.RequestParameters {
+        const reqParams = { ...DEFAULT_REQUEST_PARAMS, ...reqParamsArg };
+        this.log.debug(`Initialized with request parameters: ${JSON.stringify(reqParams)}`);
+        return reqParams;
+    }
+
+    protected defaultNonceGetter(): types.NonceGetter {
         let nonce = rand.int(0, 5e9);
 
         if (this.reqParams.useTimestampNonce) {
@@ -45,6 +41,13 @@ export class Requester {
         }
     }
 
+    protected defaultRateLimiter(): RateLimiter {
+        return new RateLimiter({
+            tokensPerInterval: 1,
+            interval: this.reqParams.throttleMs,
+        });
+    }
+
     public async request(req: types.Request): Promise<ExchangeResponse<unknown>> {
         const errs: unknown[] = [];
         const reqStr = JSON.stringify(req);
@@ -52,13 +55,9 @@ export class Requester {
         while (errs.length < this.reqParams.requestTries) {
             try {
                 await this.rateLimiter.removeTokens(1);
-                this.log.debug(
-                    `Performing request: ${reqStr} (try: ${errs.length + 1})`,
-                );
+                this.log.debug(`Performing request: ${reqStr} (try: ${errs.length + 1})`);
                 const resp = await this.makeRequest(req);
-                this.log.debug(
-                    `Got response for request (${reqStr}): ${JSON.stringify(resp)}.`,
-                );
+                this.log.debug(`Got response for request (${reqStr}): ${JSON.stringify(resp)}.`);
                 return resp;
             } catch (e) {
                 errs.push(e?.toString());
@@ -102,7 +101,7 @@ export class Requester {
     }
 
     protected checkAuthorized(): void {
-        if (this.authInfo === undefined) {
+        if (this.authInfo === DEFAULT_AUTH_INFO) {
             throw new UnauthorizedRequestError();
         }
     }
