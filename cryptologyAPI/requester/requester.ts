@@ -59,7 +59,7 @@ export class Requester {
                 this.log.debug(
                     `Got response for request (${reqStr}): ${JSON.stringify(resp)}.`,
                 );
-                return resp as unknown as ExchangeResponse<unknown>;
+                return resp;
             } catch (e) {
                 errs.push(e?.toString());
                 this.log.error(`Error performing request (${reqStr}): ${e}.`);
@@ -72,7 +72,7 @@ export class Requester {
 
     protected async makeRequest(
         req: types.Request,
-    ): Promise<Record<string, unknown>> {
+    ): Promise<ExchangeResponse<unknown>> {
         const resp = await fetch(
             new URL(req.path, this.baseURL).href,
             {

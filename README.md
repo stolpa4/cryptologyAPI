@@ -17,5 +17,5 @@
   - [x] Rate limiting logic
   - [x] Check
   - [x] Test
-  - [ ] Refactor
+  - [x] Refactor
   - [ ] 100% tests coverage
