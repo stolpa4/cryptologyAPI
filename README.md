@@ -4,8 +4,14 @@
 
 # TODO
 
-- [x] **General**
+- [ ] **General**
   - [x] Configure code formatter
+  - [ ] First stable release
+  - [ ] Move to git-flow scheme
+
+- [ ] **Utils**
+  - [x] Test logging name compounding
+  - [x] Test random int generation
 
 - [ ] **Requester**
   - [x] Logger support
