@@ -6,6 +6,7 @@
 
 - [ ] **General**
   - [x] Configure code formatter
+  - [ ] Script run/format/build/etc. commands
   - [ ] First stable release
   - [ ] Move to git-flow scheme
 
@@ -24,4 +25,5 @@
   - [x] Check
   - [x] Test
   - [x] Refactor
+  - [x] Test default properties
   - [ ] 100% tests coverage

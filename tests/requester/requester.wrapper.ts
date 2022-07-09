@@ -4,26 +4,26 @@ import { AuthInfo, NonceGetter, RequestParameters } from '../../cryptologyAPI/re
 
 export class RequesterWrapper extends Requester {
     public get spyLog(): log.Logger {
-        return super.log;
+        return this.log;
     }
 
     public get spyBaseURL(): string {
-        return super.baseURL;
+        return this.baseURL;
     }
 
     public get spyAuthInfo(): AuthInfo {
-        return super.authInfo;
+        return this.authInfo;
     }
 
     public get spyReqParams(): RequestParameters {
-        return super.reqParams;
+        return this.reqParams;
     }
 
     public get spyNonce(): NonceGetter {
-        return super.nonce;
+        return this.nonce;
     }
 
     public get spyRateLimiter(): RateLimiter {
-        return super.rateLimiter;
+        return this.rateLimiter;
     }
 }
