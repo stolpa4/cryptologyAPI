@@ -28,6 +28,6 @@
   - [x] Test default properties
   - [x] Test default request params
   - [x] Move to using assertEquals for objects
-  - [ ] Test default nonce getter
+  - [x] Test default nonce getter
   - [ ] Test default rate limiter
   - [ ] 100% tests coverage

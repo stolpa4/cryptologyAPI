@@ -107,3 +107,20 @@ describe('Test apply default request params', () => {
         require.assertEquals(req.applyDefaultRequestParams(opts), ref);
     };
 });
+
+describe('Test default nonce getter', () => {
+    let req: RequesterWrapper;
+
+    it('Should not use the timestamp nonce, when it is set so', () => {
+        req = new RequesterWrapper({ requestParameters: { useTimestampNonce: false } });
+        const nonceGetter = req.defaultNonceGetter();
+        let firstNonce = nonceGetter();
+        for (let i = 0; i < 100; ++i) require.assertEquals(++firstNonce, nonceGetter());
+    });
+
+    it('Should use the timestamp nonce, when it is set so', () => {
+        req = new RequesterWrapper({ requestParameters: { useTimestampNonce: true } });
+        const nonceGetter = req.defaultNonceGetter();
+        for (let i = 0; i < 100; ++i) require.assertAlmostEquals(Date.now(), nonceGetter(), 100);
+    });
+});

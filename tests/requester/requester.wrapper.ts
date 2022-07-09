@@ -30,4 +30,12 @@ export class RequesterWrapper extends Requester {
     public applyDefaultRequestParams(reqParamsArg: RequestParametersArg | undefined): RequestParameters {
         return super.applyDefaultRequestParams(reqParamsArg);
     }
+
+    public defaultNonceGetter(): NonceGetter {
+        return super.defaultNonceGetter();
+    }
+
+    public defaultRateLimiter(): RateLimiter {
+        return super.defaultRateLimiter();
+    }
 }
