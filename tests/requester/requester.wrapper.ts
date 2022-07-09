@@ -1,6 +1,6 @@
 import { Requester } from '../../cryptologyAPI/requester/requester.ts';
 import { log, RateLimiter } from '../../cryptologyAPI/deps.ts';
-import { AuthInfo, NonceGetter, RequestParameters } from '../../cryptologyAPI/requester/types.ts';
+import { AuthInfo, NonceGetter, RequestParameters, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
 
 export class RequesterWrapper extends Requester {
     public get spyLog(): log.Logger {
@@ -25,5 +25,9 @@ export class RequesterWrapper extends Requester {
 
     public get spyRateLimiter(): RateLimiter {
         return this.rateLimiter;
+    }
+
+    public applyDefaultRequestParams(reqParamsArg: RequestParametersArg | undefined): RequestParameters {
+        return super.applyDefaultRequestParams(reqParamsArg);
     }
 }

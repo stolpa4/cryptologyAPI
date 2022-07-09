@@ -86,3 +86,10 @@ function getMockedRateLimiter(): RateLimiter {
     rateLimiter.removeTokens = mock.spy((_num) => 0);
     return rateLimiter;
 }
+
+describe('Test apply default request params', () => {
+    const req = new RequesterWrapper();
+    it('Should use the default params in case no params is provided', () => {
+        require.assertObjectMatch(req.applyDefaultRequestParams(), DEFAULT_REQUEST_PARAMS);
+    });
+});
