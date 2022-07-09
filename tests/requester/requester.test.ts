@@ -4,7 +4,12 @@ import { asserts as require, bdd, mock } from '../deps.ts';
 const { describe, it } = bdd;
 
 import { log, RateLimiter } from '../../cryptologyAPI/deps.ts';
-import { DEFAULT_API_URL, DEFAULT_AUTH_INFO, DEFAULT_REQUEST_PARAMS } from '../../cryptologyAPI/requester/constants.ts';
+import {
+    DEFAULT_API_URL,
+    DEFAULT_AUTH_INFO,
+    DEFAULT_REQUEST_PARAMS,
+    PUBLIC_HEADERS,
+} from '../../cryptologyAPI/requester/constants.ts';
 
 import { RequesterWrapper } from './requester.wrapper.ts';
 import { NonceGetter, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
@@ -141,6 +146,27 @@ describe('Test default rate limiter', () => {
         const rateLimiter = req.defaultRateLimiter();
         require.assertEquals(rateLimiter.tokenBucket.interval, 50_000);
         require.assertEquals(rateLimiter.tokenBucket.bucketSize, 1);
+    });
+});
+
+describe('Test craftHeaders', () => {
+    let req: RequesterWrapper;
+
+    it('Should return correct public headers on a public request', () => {
+        req = new RequesterWrapper();
+        require.assertEquals(req.craftHeaders(false), PUBLIC_HEADERS);
+        require.assertEquals(req.craftHeaders(undefined), PUBLIC_HEADERS);
+    });
+
+    it('Should return correct private headers on a private request', () => {
+        const authInfo = { apiKey: 'A', apiSecret: 'B' };
+        req = new RequesterWrapper({ authInfo });
+        require.assertEquals(req.craftHeaders(true), {
+            ...PUBLIC_HEADERS,
+            'Access-Key': authInfo.apiKey,
+            'Secret-Key': authInfo.apiSecret,
+            Nonce: String(req.spyNonce() - 1),
+        });
     });
 });
 

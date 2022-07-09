@@ -32,7 +32,7 @@
   - [x] Move to using assertEquals for objects
   - [x] Test default nonce getter
   - [x] Test default rate limiter
-  - [ ] Test craftHeaders
+  - [x] Test craftHeaders
   - [x] Test checkAuthorized
   - [ ] Refactor makeRequest - factor out all fetch args creation
   - [ ] Test all fetch-arg-generators
