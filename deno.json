@@ -1,5 +1,9 @@
 {
     "fmt": {
+        "files": {
+            "include": ["tests/", "cryptologyAPI/"],
+            "exclude": ["tests/coverage/"]
+        },
         "options": {
             "useTabs": false,
             "lineWidth": 120,
@@ -7,5 +11,9 @@
             "singleQuote": true,
             "proseWrap": "always"
         }
+    },
+    "tasks": {
+        "fmt": "deno fmt",
+        "test": "deno test --coverage=tests/coverage"
     }
 }

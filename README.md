@@ -6,8 +6,9 @@
 
 - [ ] **General**
   - [x] Configure code formatter
-  - [ ] Add git ignore
-  - [ ] Script run/format/build/etc. commands
+  - [x] Add git ignore
+  - [x] Script run/format/build/etc. commands
+  - [ ] Provide test and fmt git hooks
   - [ ] First stable release
   - [ ] Move to git-flow scheme
 
