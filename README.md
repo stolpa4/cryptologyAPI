@@ -26,5 +26,7 @@
   - [x] Test
   - [x] Refactor
   - [x] Test default properties
-  - [ ] Test default request params
+  - [x] Test default request params
+  - [ ] Test default nonce getter
+  - [ ] Test default rate limiter
   - [ ] 100% tests coverage

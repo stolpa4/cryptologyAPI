@@ -7,7 +7,7 @@ import { log, RateLimiter } from '../../cryptologyAPI/deps.ts';
 import { DEFAULT_API_URL, DEFAULT_AUTH_INFO, DEFAULT_REQUEST_PARAMS } from '../../cryptologyAPI/requester/constants.ts';
 
 import { RequesterWrapper } from './requester.wrapper.ts';
-import { NonceGetter } from '../../cryptologyAPI/requester/types.ts';
+import { NonceGetter, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
 
 describe('Requester default properties', () => {
     it('Should use the default params in case no params is provided', () => {
@@ -89,7 +89,21 @@ function getMockedRateLimiter(): RateLimiter {
 
 describe('Test apply default request params', () => {
     const req = new RequesterWrapper();
+
     it('Should use the default params in case no params is provided', () => {
-        require.assertObjectMatch(req.applyDefaultRequestParams(), DEFAULT_REQUEST_PARAMS);
+        require.assertObjectMatch(req.applyDefaultRequestParams(undefined), DEFAULT_REQUEST_PARAMS);
     });
+
+    it('Should use the manually provided requestTries param over the default', () =>
+        cmpOpts({ requestTries: 1000_000 }));
+    it('Should use the manually provided requestErrorDelayMs param over the default', () =>
+        cmpOpts({ requestErrorDelayMs: 1 }));
+    it('Should use the manually provided throttleMs param over the default', () => cmpOpts({ throttleMs: 1 }));
+    it('Should use the manually provided useTimestampNonce param over the default', () =>
+        cmpOpts({ useTimestampNonce: true }));
+
+    const cmpOpts = (opts: RequestParametersArg) => {
+        const ref = { ...DEFAULT_REQUEST_PARAMS, ...opts };
+        require.assertObjectMatch(req.applyDefaultRequestParams(opts), ref);
+    };
 });
