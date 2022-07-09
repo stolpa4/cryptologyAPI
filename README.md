@@ -34,7 +34,8 @@
   - [x] Test default rate limiter
   - [x] Test craftHeaders
   - [x] Test checkAuthorized
-  - [ ] Refactor makeRequest - factor out all fetch args creation
-  - [ ] Test all fetch-arg-generators
+  - [x] Refactor makeRequest - factor out all fetch args creation
+  - [ ] Test compoundURL
+  - [ ] Test compoundRequestOptions
   - [ ] Test request with makeRequest and rateLimiter mocks
   - [ ] 100% tests coverage

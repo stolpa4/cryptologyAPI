@@ -73,14 +73,22 @@ export class Requester {
         req: types.Request,
     ): Promise<ExchangeResponse<unknown>> {
         const resp = await fetch(
-            new URL(req.path, this.baseURL).href,
-            {
-                headers: this.craftHeaders(req.isPrivate),
-                method: req.method,
-                body: req.data ? JSON.stringify(req.data) : undefined,
-            },
+            this.compoundURL(req.path),
+            this.compoundRequestOptions(req),
         );
         return await resp.json();
+    }
+
+    protected compoundURL(path: string): string {
+        return new URL(path, this.baseURL).href;
+    }
+
+    protected compoundRequestOptions(req: types.Request): RequestInit {
+        return {
+            headers: this.craftHeaders(req.isPrivate),
+            method: req.method,
+            body: req.data ? JSON.stringify(req.data) : undefined,
+        };
     }
 
     protected craftHeaders(isPrivate: boolean | undefined): HeadersInit {
