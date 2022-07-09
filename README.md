@@ -8,7 +8,7 @@
   - [x] Configure code formatter
   - [x] Add git ignore
   - [x] Script run/format/build/etc. commands
-  - [ ] Provide test and fmt git hooks
+  - [x] Provide test and fmt git hooks
   - [ ] First stable release
   - [ ] Move to git-flow scheme
 
