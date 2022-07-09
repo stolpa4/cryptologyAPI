@@ -6,6 +6,7 @@
 
 - [ ] **General**
   - [x] Configure code formatter
+  - [ ] Add git ignore
   - [ ] Script run/format/build/etc. commands
   - [ ] First stable release
   - [ ] Move to git-flow scheme
@@ -29,5 +30,5 @@
   - [x] Test default request params
   - [x] Move to using assertEquals for objects
   - [x] Test default nonce getter
-  - [ ] Test default rate limiter
+  - [x] Test default rate limiter
   - [ ] 100% tests coverage

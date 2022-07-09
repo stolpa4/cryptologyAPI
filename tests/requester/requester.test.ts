@@ -124,3 +124,21 @@ describe('Test default nonce getter', () => {
         for (let i = 0; i < 100; ++i) require.assertAlmostEquals(Date.now(), nonceGetter(), 100);
     });
 });
+
+describe('Test default rate limiter', () => {
+    let req: RequesterWrapper;
+
+    it('Should configure the throttling correctly when using defaults', () => {
+        req = new RequesterWrapper({ requestParameters: { throttleMs: DEFAULT_REQUEST_PARAMS.throttleMs } });
+        const rateLimiter = req.defaultRateLimiter();
+        require.assertEquals(rateLimiter.tokenBucket.interval, DEFAULT_REQUEST_PARAMS.throttleMs);
+        require.assertEquals(rateLimiter.tokenBucket.bucketSize, 1);
+    });
+
+    it('Should configure the throttling correctly when using manual params', () => {
+        req = new RequesterWrapper({ requestParameters: { throttleMs: 50_000 } });
+        const rateLimiter = req.defaultRateLimiter();
+        require.assertEquals(rateLimiter.tokenBucket.interval, 50_000);
+        require.assertEquals(rateLimiter.tokenBucket.bucketSize, 1);
+    });
+});
