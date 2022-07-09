@@ -38,4 +38,17 @@ export class RequesterWrapper extends Requester {
     public defaultRateLimiter(): RateLimiter {
         return super.defaultRateLimiter();
     }
+
+    public craftHeaders(isPrivate: boolean | undefined): HeadersInit {
+        return super.craftHeaders(isPrivate);
+    }
+
+    public checkAuthorized(): void {
+        // We don't want this check to be forced in the tests,
+        // at the same time we can test it separately though a different wrapper method
+    }
+
+    public checkAuthorizedOriginal(): void {
+        super.checkAuthorized();
+    }
 }

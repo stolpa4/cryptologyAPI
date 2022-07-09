@@ -8,6 +8,7 @@ import { DEFAULT_API_URL, DEFAULT_AUTH_INFO, DEFAULT_REQUEST_PARAMS } from '../.
 
 import { RequesterWrapper } from './requester.wrapper.ts';
 import { NonceGetter, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
+import { UnauthorizedRequestError } from '../../cryptologyAPI/requester/error.ts';
 
 describe('Requester default properties', () => {
     it('Should use the default params in case no params is provided', () => {
@@ -140,5 +141,20 @@ describe('Test default rate limiter', () => {
         const rateLimiter = req.defaultRateLimiter();
         require.assertEquals(rateLimiter.tokenBucket.interval, 50_000);
         require.assertEquals(rateLimiter.tokenBucket.bucketSize, 1);
+    });
+});
+
+describe('Test checkAuthorized', () => {
+    let req: RequesterWrapper;
+
+    it('Should throw an error when no authorization is provided', () => {
+        req = new RequesterWrapper();
+        require.assertThrows(() => req.checkAuthorizedOriginal(), UnauthorizedRequestError);
+    });
+
+    it('Shouldn\'t throw an error when authorization info is provided', () => {
+        req = new RequesterWrapper({ authInfo: { apiKey: 'A', apiSecret: 'B' } });
+        // assert not throws
+        req.checkAuthorizedOriginal();
     });
 });
