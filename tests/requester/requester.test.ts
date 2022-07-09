@@ -184,3 +184,13 @@ describe('Test checkAuthorized', () => {
         req.checkAuthorizedOriginal();
     });
 });
+
+describe('Test compoundURL', () => {
+    const baseURL = 'http://test.com';
+    const req = new RequesterWrapper({ baseURL });
+
+    it('correctly concatenate base url and a path', () => {
+        require.assertStrictEquals(req.compoundURL('test/path'), `${baseURL}/test/path`);
+        require.assertStrictEquals(req.compoundURL('test1/path2/again3'), `${baseURL}/test1/path2/again3`);
+    });
+});

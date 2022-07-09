@@ -1,6 +1,7 @@
 import { Requester } from '../../cryptologyAPI/requester/requester.ts';
 import { log, RateLimiter } from '../../cryptologyAPI/deps.ts';
 import { AuthInfo, NonceGetter, RequestParameters, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
+import { Request } from '../../cryptologyAPI/requester/types.ts';
 
 export class RequesterWrapper extends Requester {
     public get spyLog(): log.Logger {
@@ -37,6 +38,14 @@ export class RequesterWrapper extends Requester {
 
     public defaultRateLimiter(): RateLimiter {
         return super.defaultRateLimiter();
+    }
+
+    public compoundURL(path: string): string {
+        return super.compoundURL(path);
+    }
+
+    public compoundRequestOptions(req: Request): RequestInit {
+        return super.compoundRequestOptions(req);
     }
 
     public craftHeaders(isPrivate: boolean | undefined): HeadersInit {

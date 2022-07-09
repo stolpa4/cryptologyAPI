@@ -35,7 +35,7 @@
   - [x] Test craftHeaders
   - [x] Test checkAuthorized
   - [x] Refactor makeRequest - factor out all fetch args creation
-  - [ ] Test compoundURL
+  - [x] Test compoundURL
   - [ ] Test compoundRequestOptions
   - [ ] Test request with makeRequest and rateLimiter mocks
   - [ ] 100% tests coverage
