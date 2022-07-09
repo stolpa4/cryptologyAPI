@@ -31,19 +31,19 @@ describe('Requester default properties', () => {
     it('Should use the default authInfo in case no authInfo is provided', () => {
         const authInfo = { apiKey: 'test', apiSecret: 'test' };
         let req = new RequesterWrapper({ authInfo });
-        require.assertObjectMatch(authInfo, req.spyAuthInfo);
+        require.assertEquals(authInfo, req.spyAuthInfo);
 
         req = new RequesterWrapper();
-        require.assertObjectMatch(DEFAULT_AUTH_INFO, req.spyAuthInfo);
+        require.assertEquals(DEFAULT_AUTH_INFO, req.spyAuthInfo);
     });
 
     it('Should use the default requestParams in case no requestParams is provided', () => {
         const requestParameters = { requestTries: 1, requestErrorDelayMs: 1, throttleMs: 1, useTimestampNonce: true };
         let req = new RequesterWrapper({ requestParameters });
-        require.assertObjectMatch(requestParameters, req.spyReqParams);
+        require.assertEquals(requestParameters, req.spyReqParams);
 
         req = new RequesterWrapper();
-        require.assertObjectMatch(DEFAULT_REQUEST_PARAMS, req.spyReqParams);
+        require.assertEquals(DEFAULT_REQUEST_PARAMS, req.spyReqParams);
     });
 
     it('Should use the default nonce getter in case no nonce getter is provided', () => {
@@ -91,7 +91,7 @@ describe('Test apply default request params', () => {
     const req = new RequesterWrapper();
 
     it('Should use the default params in case no params is provided', () => {
-        require.assertObjectMatch(req.applyDefaultRequestParams(undefined), DEFAULT_REQUEST_PARAMS);
+        require.assertEquals(req.applyDefaultRequestParams(undefined), DEFAULT_REQUEST_PARAMS);
     });
 
     it('Should use the manually provided requestTries param over the default', () =>
@@ -104,6 +104,6 @@ describe('Test apply default request params', () => {
 
     const cmpOpts = (opts: RequestParametersArg) => {
         const ref = { ...DEFAULT_REQUEST_PARAMS, ...opts };
-        require.assertObjectMatch(req.applyDefaultRequestParams(opts), ref);
+        require.assertEquals(req.applyDefaultRequestParams(opts), ref);
     };
 });
