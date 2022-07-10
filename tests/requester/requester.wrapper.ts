@@ -1,9 +1,32 @@
 import { Requester } from '../../cryptologyAPI/requester/requester.ts';
 import { log, RateLimiter } from '../../cryptologyAPI/deps.ts';
-import { AuthInfo, NonceGetter, RequestParameters, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
-import { Request } from '../../cryptologyAPI/requester/types.ts';
+import * as types from '../../cryptologyAPI/requester/types.ts';
+import {
+    AuthInfo,
+    ExchangeResponse,
+    NonceGetter,
+    Request,
+    RequestParameters,
+    RequestParametersArg,
+    ResponseStatus,
+} from '../../cryptologyAPI/requester/types.ts';
 
 export class RequesterWrapper extends Requester {
+    public response: ExchangeResponse<unknown>;
+
+    public constructor(opts: types.RequesterOptions = {}) {
+        super(opts);
+        this.response = {
+            status: ResponseStatus.Ok,
+            error: null,
+            data: {
+                trade_pair: 'BTC_USD',
+                base_currency: 'BTC',
+                quoted_currency: 'USD',
+            },
+        };
+    }
+
     public get spyLog(): log.Logger {
         return this.log;
     }
@@ -59,5 +82,9 @@ export class RequesterWrapper extends Requester {
 
     public checkAuthorizedOriginal(): void {
         super.checkAuthorized();
+    }
+
+    public async makeRequest(req: Request): Promise<ExchangeResponse<unknown>> {
+        return this.response;
     }
 }

@@ -15,7 +15,7 @@ export class Requester {
     protected readonly nonce: types.NonceGetter;
     protected readonly rateLimiter: RateLimiter;
 
-    constructor(opts: types.RequesterOptions = {}) {
+    public constructor(opts: types.RequesterOptions = {}) {
         this.log = opts.logger ?? getLogger('requester');
         this.baseURL = opts.baseURL ?? DEFAULT_API_URL;
         this.authInfo = opts.authInfo ?? DEFAULT_AUTH_INFO;

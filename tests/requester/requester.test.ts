@@ -223,3 +223,7 @@ describe('Test compoundRequestOptions', () => {
         require.assertStrictEquals(req.compoundRequestOptions({ path }).body, undefined);
     });
 });
+
+describe('Test request', () => {
+
+});

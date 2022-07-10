@@ -9,9 +9,9 @@
   - [x] Add git ignore
   - [x] Script run/format/build/etc. commands
   - [x] Provide test and fmt git hooks
+  - [ ] Move to nodejs
   - [ ] First stable release
   - [ ] Move to git-flow scheme
-  - [ ] Enable nodejs support: https://github.com/denoland/dnt
 
 - [x] **Utils**
   - [x] Test logging name compounding
@@ -38,6 +38,7 @@
   - [x] Refactor makeRequest - factor out all fetch args creation
   - [x] Test compoundURL
   - [x] Test compoundRequestOptions
+  - [x] Mock makeRequest
   - [ ] Test request with makeRequest and rateLimiter mocks
   - [ ] 100% tests coverage
   - [ ] 100% Doc-comments for functions, classes and modules
