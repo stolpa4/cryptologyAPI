@@ -86,7 +86,7 @@ export class Requester {
     protected compoundRequestOptions(req: types.Request): RequestInit {
         return {
             headers: this.craftHeaders(req.isPrivate),
-            method: req.method,
+            method: req.data ? 'POST' : 'GET',
             body: req.data ? JSON.stringify(req.data) : undefined,
         };
     }

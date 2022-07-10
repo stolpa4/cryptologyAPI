@@ -23,7 +23,6 @@ const req = new Requester();
 
 let resp = await req.request({
     path: '/v1/public/get-order-book?trade_pair=ETH_USDT',
-    method: 'get',
 });
 
 console.log(resp, typeof resp);

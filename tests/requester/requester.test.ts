@@ -12,7 +12,7 @@ import {
 } from '../../cryptologyAPI/requester/constants.ts';
 
 import { RequesterWrapper } from './requester.wrapper.ts';
-import { NonceGetter, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
+import { AuthInfo, NonceGetter, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
 import { UnauthorizedRequestError } from '../../cryptologyAPI/requester/error.ts';
 
 describe('Requester default properties', () => {
@@ -161,14 +161,18 @@ describe('Test craftHeaders', () => {
     it('Should return correct private headers on a private request', () => {
         const authInfo = { apiKey: 'A', apiSecret: 'B' };
         req = new RequesterWrapper({ authInfo });
-        require.assertEquals(req.craftHeaders(true), {
-            ...PUBLIC_HEADERS,
-            'Access-Key': authInfo.apiKey,
-            'Secret-Key': authInfo.apiSecret,
-            Nonce: String(req.spyNonce() - 1),
-        });
+        verifyPrivateHeaders(req.craftHeaders(true), authInfo, req.spyNonce());
     });
 });
+
+function verifyPrivateHeaders(headers: HeadersInit, authInfo: AuthInfo, nonce: number): void {
+    require.assertEquals(headers, {
+        ...PUBLIC_HEADERS,
+        'Access-Key': authInfo.apiKey,
+        'Secret-Key': authInfo.apiSecret,
+        Nonce: String(nonce - 1),
+    });
+}
 
 describe('Test checkAuthorized', () => {
     let req: RequesterWrapper;
@@ -192,5 +196,30 @@ describe('Test compoundURL', () => {
     it('correctly concatenate base url and a path', () => {
         require.assertStrictEquals(req.compoundURL('test/path'), `${baseURL}/test/path`);
         require.assertStrictEquals(req.compoundURL('test1/path2/again3'), `${baseURL}/test1/path2/again3`);
+    });
+});
+
+describe('Test compoundRequestOptions', () => {
+    let req: RequesterWrapper;
+    const path = '/test/path';
+
+    it('Should return correct headers', () => {
+        const authInfo = { apiKey: 'A', apiSecret: 'B' };
+        req = new RequesterWrapper({ authInfo });
+        require.assertEquals(req.compoundRequestOptions({ path, isPrivate: false }).headers, PUBLIC_HEADERS);
+        const privateHeaders = req.compoundRequestOptions({ path, isPrivate: true }).headers!;
+        verifyPrivateHeaders(privateHeaders, authInfo, req.spyNonce());
+    });
+
+    it('Should return correct method', () => {
+        req = new RequesterWrapper();
+        require.assertStrictEquals(req.compoundRequestOptions({ path, data: { a: 'b' } }).method, 'POST');
+        require.assertStrictEquals(req.compoundRequestOptions({ path }).method, 'GET');
+    });
+
+    it('Should return correct data', () => {
+        req = new RequesterWrapper();
+        require.assertStrictEquals(req.compoundRequestOptions({ path, data: { a: 'b' } }).body, '{"a":"b"}');
+        require.assertStrictEquals(req.compoundRequestOptions({ path }).body, undefined);
     });
 });

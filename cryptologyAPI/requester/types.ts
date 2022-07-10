@@ -32,7 +32,6 @@ export type NonceGetter = () => number;
 
 export interface Request {
     readonly path: string;
-    readonly method: string;
     readonly data?: Record<string, unknown>;
     readonly isPrivate?: boolean;
 }

@@ -11,6 +11,7 @@
   - [x] Provide test and fmt git hooks
   - [ ] First stable release
   - [ ] Move to git-flow scheme
+  - [ ] Enable nodejs support: https://github.com/denoland/dnt
 
 - [x] **Utils**
   - [x] Test logging name compounding
@@ -36,6 +37,7 @@
   - [x] Test checkAuthorized
   - [x] Refactor makeRequest - factor out all fetch args creation
   - [x] Test compoundURL
-  - [ ] Test compoundRequestOptions
+  - [x] Test compoundRequestOptions
   - [ ] Test request with makeRequest and rateLimiter mocks
   - [ ] 100% tests coverage
+  - [ ] 100% Doc-comments for functions, classes and modules
