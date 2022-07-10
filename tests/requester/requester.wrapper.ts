@@ -1,5 +1,6 @@
 import { Requester } from '../../cryptologyAPI/requester/requester.ts';
 import { log, RateLimiter } from '../../cryptologyAPI/deps.ts';
+import { mock } from '../deps.ts';
 import * as types from '../../cryptologyAPI/requester/types.ts';
 import {
     AuthInfo,
@@ -84,7 +85,14 @@ export class RequesterWrapper extends Requester {
         super.checkAuthorized();
     }
 
-    public async makeRequest(req: Request): Promise<ExchangeResponse<unknown>> {
+    public async makeRequest(_req: Request): Promise<ExchangeResponse<unknown>> {
         return this.response;
+    }
+
+    public mockRequest(
+        func: (req: Request) => Promise<ExchangeResponse<unknown>> = () =>
+            new Promise((resolve) => resolve(this.response)),
+    ): void {
+        this.makeRequest = mock.spy(func);
     }
 }

@@ -225,5 +225,42 @@ describe('Test compoundRequestOptions', () => {
 });
 
 describe('Test request', () => {
+    let req: RequesterWrapper;
+    const path = '/test/path';
+    it('Should return the data as is', async () => {
+        req = new RequesterWrapper();
+        require.assertEquals(await req.request({ path }), req.response);
+    });
 
+    it('Should use the request function and rate limiter correctly in case of typical flow', async () => {
+        req = new RequesterWrapper({ rateLimiter: getMockedRateLimiter() });
+        req.mockRequest();
+        require.assertEquals(await req.request({ path }), req.response);
+        mock.assertSpyCalls(req.makeRequest, 1);
+        // Need to make sure the function returned a correct promise
+        mock.assertSpyCall(req.makeRequest, 0, {
+            args: [{ path }],
+            returned: new Promise((resolve) => resolve(req.response)),
+        });
+        mock.assertSpyCalls(req.spyRateLimiter.removeTokens, 1);
+        mock.assertSpyCall(req.spyRateLimiter.removeTokens, 0, { args: [1], returned: 0 });
+    });
+
+    // // Test once, test multiple and test never (test throws)
+    // it('Should use the request function and rate limiter twice correctly in case of a wild error', async () => {
+    //     req = new RequesterWrapper({ rateLimiter: getMockedRateLimiter() });
+    //     req.mockRequest(() => {
+    //         let call = 1;
+    //         return new Promise((resolve, reject) => {
+    //             if (call) {
+    //                 call -= 1;
+    //                 reject('Fuck you!');
+    //             }
+    //             resolve(req.response);
+    //         })
+    //     });
+    //     require.assertEquals(await req.request({ path }), req.response);
+    //     mock.assertSpyCalls(req.makeRequest, 1, { args: { path }, returned: req.response });
+    //     mock.assertSpyCalls(req.spyRateLimiter.removeTokens, 1, { args: 1, returned: 0 });
+    // });
 });
