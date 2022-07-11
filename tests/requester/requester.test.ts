@@ -13,7 +13,7 @@ import {
 
 import { RequesterWrapper } from './requester.wrapper.ts';
 import { AuthInfo, NonceGetter, RequestParametersArg } from '../../cryptologyAPI/requester/types.ts';
-import { UnauthorizedRequestError } from '../../cryptologyAPI/requester/error.ts';
+import { UnableToPerformRequestError, UnauthorizedRequestError } from '../../cryptologyAPI/requester/error.ts';
 
 describe('Requester default properties', () => {
     it('Should use the default params in case no params is provided', () => {
@@ -194,73 +194,116 @@ describe('Test compoundURL', () => {
     const req = new RequesterWrapper({ baseURL });
 
     it('correctly concatenate base url and a path', () => {
-        require.assertStrictEquals(req.compoundURL('test/path'), `${baseURL}/test/path`);
+        require.assertStrictEquals(req.compoundURL(req.samplePath), `${baseURL}${req.samplePath}`);
         require.assertStrictEquals(req.compoundURL('test1/path2/again3'), `${baseURL}/test1/path2/again3`);
     });
 });
 
 describe('Test compoundRequestOptions', () => {
     let req: RequesterWrapper;
-    const path = '/test/path';
 
     it('Should return correct headers', () => {
         const authInfo = { apiKey: 'A', apiSecret: 'B' };
         req = new RequesterWrapper({ authInfo });
-        require.assertEquals(req.compoundRequestOptions({ path, isPrivate: false }).headers, PUBLIC_HEADERS);
-        const privateHeaders = req.compoundRequestOptions({ path, isPrivate: true }).headers!;
+        require.assertEquals(
+            req.compoundRequestOptions({ path: req.samplePath, isPrivate: false }).headers,
+            PUBLIC_HEADERS,
+        );
+        const privateHeaders = req.compoundRequestOptions({ path: req.samplePath, isPrivate: true }).headers!;
         verifyPrivateHeaders(privateHeaders, authInfo, req.spyNonce());
     });
 
     it('Should return correct method', () => {
         req = new RequesterWrapper();
-        require.assertStrictEquals(req.compoundRequestOptions({ path, data: { a: 'b' } }).method, 'POST');
-        require.assertStrictEquals(req.compoundRequestOptions({ path }).method, 'GET');
+        require.assertStrictEquals(
+            req.compoundRequestOptions({ path: req.samplePath, data: { a: 'b' } }).method,
+            'POST',
+        );
+        require.assertStrictEquals(req.compoundRequestOptions({ path: req.samplePath }).method, 'GET');
     });
 
     it('Should return correct data', () => {
         req = new RequesterWrapper();
-        require.assertStrictEquals(req.compoundRequestOptions({ path, data: { a: 'b' } }).body, '{"a":"b"}');
-        require.assertStrictEquals(req.compoundRequestOptions({ path }).body, undefined);
+        require.assertStrictEquals(
+            req.compoundRequestOptions({ path: req.samplePath, data: { a: 'b' } }).body,
+            '{"a":"b"}',
+        );
+        require.assertStrictEquals(req.compoundRequestOptions({ path: req.samplePath }).body, undefined);
     });
 });
 
 describe('Test request', () => {
     let req: RequesterWrapper;
-    const path = '/test/path';
     it('Should return the data as is', async () => {
         req = new RequesterWrapper();
-        require.assertEquals(await req.request({ path }), req.response);
+        require.assertEquals(await req.request({ path: req.samplePath }), req.response);
     });
 
     it('Should use the request function and rate limiter correctly in case of typical flow', async () => {
-        req = new RequesterWrapper({ rateLimiter: getMockedRateLimiter() });
-        req.mockRequest();
-        require.assertEquals(await req.request({ path }), req.response);
-        mock.assertSpyCalls(req.makeRequest, 1);
-        // Need to make sure the function returned a correct promise
-        mock.assertSpyCall(req.makeRequest, 0, {
-            args: [{ path }],
-            returned: new Promise((resolve) => resolve(req.response)),
-        });
-        mock.assertSpyCalls(req.spyRateLimiter.removeTokens, 1);
-        mock.assertSpyCall(req.spyRateLimiter.removeTokens, 0, { args: [1], returned: 0 });
+        await testRequest(0);
     });
 
-    // // Test once, test multiple and test never (test throws)
-    // it('Should use the request function and rate limiter twice correctly in case of a wild error', async () => {
-    //     req = new RequesterWrapper({ rateLimiter: getMockedRateLimiter() });
-    //     req.mockRequest(() => {
-    //         let call = 1;
-    //         return new Promise((resolve, reject) => {
-    //             if (call) {
-    //                 call -= 1;
-    //                 reject('Fuck you!');
-    //             }
-    //             resolve(req.response);
-    //         })
-    //     });
-    //     require.assertEquals(await req.request({ path }), req.response);
-    //     mock.assertSpyCalls(req.makeRequest, 1, { args: { path }, returned: req.response });
-    //     mock.assertSpyCalls(req.spyRateLimiter.removeTokens, 1, { args: 1, returned: 0 });
-    // });
+    it('Should use the request function and rate limiter correctly in case of a wild error', async () => {
+        await testRequest(1);
+    });
+
+    it('Should use the request function and rate limiter correctly in case of a series of errors', async () => {
+        await testRequest(4);
+    });
+
+    it('Should use the request function and rate limiter correctly in case of a long series of errors', async () => {
+        await testRequest(100);
+    });
 });
+
+async function testRequest(numErrs = 0) {
+    const req = prepareRequester(numErrs);
+
+    if (numErrs < req.spyReqParams.requestTries) {
+        require.assertEquals(await req.request({ path: req.samplePath }), req.response);
+        mock.assertSpyCalls(req.makeRequest, numErrs + 1);
+        mock.assertSpyCalls(req.spyRateLimiter.removeTokens, numErrs + 1);
+
+        for (let i = 0; i < numErrs; i++) checkCall(req, i, true);
+        checkCall(req, numErrs, true);
+    } else {
+        await require.assertRejects(
+            async () => await req.request({ path: req.samplePath }),
+            UnableToPerformRequestError,
+        );
+    }
+}
+
+function checkCall(req: RequesterWrapper, callNum: number, error = false) {
+    let additionalProps: mock.ExpectedSpyCall;
+    if (error) {
+        additionalProps = {/* error: Error //, we need to ensure somehow rejected promise here*/};
+    } else {
+        additionalProps = { returned: new Promise((resolve) => resolve(req.response)) };
+    }
+
+    mock.assertSpyCall(req.makeRequest, callNum, {
+        args: [{ path: req.samplePath }],
+        ...additionalProps,
+    });
+    mock.assertSpyCall(req.spyRateLimiter.removeTokens, 0, { args: [1], returned: 0 });
+}
+
+function prepareRequester(numErrs: number): RequesterWrapper {
+    const req = new RequesterWrapper({
+        rateLimiter: getMockedRateLimiter(),
+        requestParameters: { requestErrorDelayMs: 0, throttleMs: 0 },
+    });
+
+    req.mockRequest(() => {
+        return new Promise((resolve, reject) => {
+            if (numErrs) {
+                numErrs -= 1;
+                reject(new Error('Error quering API!!!'));
+            }
+            resolve(req.response);
+        });
+    });
+
+    return req;
+}

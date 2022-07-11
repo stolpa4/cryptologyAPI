@@ -39,6 +39,7 @@
   - [x] Test compoundURL
   - [x] Test compoundRequestOptions
   - [x] Mock makeRequest
-  - [ ] Test request with makeRequest and rateLimiter mocks
-  - [ ] 100% tests coverage
+  - [x] Test request with makeRequest and rateLimiter mocks
+  - [x] Refactor the tests
+  - [x] 100% tests coverage (almost)
   - [ ] 100% Doc-comments for functions, classes and modules

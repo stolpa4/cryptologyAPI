@@ -14,9 +14,11 @@ import {
 
 export class RequesterWrapper extends Requester {
     public response: ExchangeResponse<unknown>;
+    public samplePath: string;
 
     public constructor(opts: types.RequesterOptions = {}) {
         super(opts);
+        this.samplePath = '/test/sample';
         this.response = {
             status: ResponseStatus.Ok,
             error: null,

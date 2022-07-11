@@ -15,6 +15,7 @@
     "tasks": {
         "fmt": "deno fmt",
         "test": "deno test --coverage=tests/coverage",
-        "coverage": "deno coverage tests/coverage"
+        "coverage": "deno coverage tests/coverage",
+        "clean": "rm -rf tests/coverage"
     }
 }
